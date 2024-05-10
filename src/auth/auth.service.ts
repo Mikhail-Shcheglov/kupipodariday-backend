@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as bycrypt from 'bcrypt';
 
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -34,14 +34,6 @@ export class AuthService {
   }
 
   async register(createUserDto: CreateUserDto) {
-    const userByName = await this.usersService.findOne('username', createUserDto.username);
-    
-    const userByEmail = await this.usersService.findOne('email', createUserDto.email);
-
-    if (userByName || userByEmail) {
-      throw new BadRequestException(Errors.USER_EXIST);
-    }
-
     return this.usersService.create(createUserDto);
   }
 }

@@ -4,4 +4,5 @@ export class CreateWishDto {
   image: string;
   price: number;
   description: string;
+  raised: number;
 }

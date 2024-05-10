@@ -3,7 +3,7 @@ import { CreateOfferDto } from './dto/create-offer.dto';
 import { UpdateOfferDto } from './dto/update-offer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Offer } from './entities/offer.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { WishesService } from 'src/wishes/wishes.service';
 import { User } from 'src/users/entities/user.entity';
 import { Errors } from 'src/utils';
@@ -14,7 +14,9 @@ export class OffersService {
     @InjectRepository(Offer)
     private offerRepository: Repository<Offer>,
     private readonly wishesService: WishesService,
+    private readonly dataSource: DataSource,
   ) {}
+
   async create(createOfferDto: CreateOfferDto, user: User): Promise<Offer> {
     const { amount, itemId } = createOfferDto;
     const wish = await this.wishesService.findOne(createOfferDto.itemId);
@@ -23,11 +25,30 @@ export class OffersService {
       throw new BadRequestException(Errors.WRONG_DATA);
     }
 
-    return this.offerRepository.save({
-      ...createOfferDto,
-      item: wish,
-      user,
-    });
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const updatedWish = await this.wishesService.updateOne(wish.id, wish.owner.id, {
+        raised: wish.raised + createOfferDto.amount,
+      });
+
+      const updatedOffer = this.offerRepository.save({
+        ...createOfferDto,
+        item: updatedWish,
+        user,
+      });
+
+      await queryRunner.commitTransaction();
+  
+      return updatedOffer;
+    } catch (_) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   findMany(): Promise<Offer[]> {

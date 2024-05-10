@@ -18,17 +18,19 @@ export class UsersService {
     return bcrypt.hash(password, 10);
   }
 
-  create(createUserDto: CreateUserDto): Promise<User> {
-    const { password } = createUserDto;
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const { email, password, username } = createUserDto;
+
+    const user = await this.userRepository.findOne({ where: [{ email}, { username }] });
+
+    if (user) {
+      throw new ConflictException(Errors.USER_EXIST)
+    }
 
     return this.userRepository.save({
       ...createUserDto,
       password,
     });
-  }
-
-  findAll(): Promise<User[]> {
-    return this.userRepository.find();
   }
 
   findOne(key: string, param: any): Promise<User> {
@@ -55,10 +57,6 @@ export class UsersService {
     } catch(_) {
       throw new BadRequestException(Errors.WRONG_DATA);
     }
-  }
-
-  removeOne(id: number) {
-    return this.userRepository.delete({ id });
   }
 
   findWithWishes(id: number) {

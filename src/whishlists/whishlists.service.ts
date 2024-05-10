@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateWhishlistDto } from './dto/create-whishlist.dto';
 import { UpdateWhishlistDto } from './dto/update-whishlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -71,7 +71,13 @@ export class WhishlistsService {
     return this.wishlistRepository.update({ id }, updateWhishlistDto);
   }
 
-  removeOne(id: number) {
+  async removeOne(id: number, userId: number) {
+    const wishlist = await this.findOne(id);
+
+    if (wishlist.owner.id !== userId) {
+      throw new ForbiddenException(Errors.WISHLIST_DELETE_FOREIGN)
+    }
+    
     return this.wishlistRepository.delete({ id });
   }
 }

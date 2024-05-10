@@ -9,4 +9,5 @@ export enum Errors {
   WISH_DELETE_FORBIDDEN = 'Нельзя удалить чужой подарок',
   WISH_NOT_FOUND = 'Подарок не найден',
   WISH_OWNER_REWRITE = 'Подарок уже добавлен пользователю',
+  WISHLIST_DELETE_FOREIGN = 'Вы не можете удалять чужие списки подарков',
 }

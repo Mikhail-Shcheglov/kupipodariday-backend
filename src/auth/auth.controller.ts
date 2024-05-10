@@ -4,10 +4,14 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { LocalGuard } from './local.guard';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @UseGuards(LocalGuard)
   @Post('signin')
@@ -17,6 +21,6 @@ export class AuthController {
 
   @Post('signup')
   signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.register(createUserDto);
+    return this.usersService.create(createUserDto);
   }
 }

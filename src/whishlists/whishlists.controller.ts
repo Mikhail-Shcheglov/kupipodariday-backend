@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { WhishlistsService } from './whishlists.service';
 import { CreateWhishlistDto } from './dto/create-whishlist.dto';
 import { UpdateWhishlistDto } from './dto/update-whishlist.dto';
+import { JwtGuard } from 'src/auth/jwt.guard';
 
 @Controller('whishlists')
 export class WhishlistsController {
@@ -32,7 +33,8 @@ export class WhishlistsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.whishlistsService.removeOne(+id);
+  @UseGuards(JwtGuard)
+  remove(@Param('id') id: string, @Req() req) {
+    return this.whishlistsService.removeOne(+id, req.user);
   }
 }

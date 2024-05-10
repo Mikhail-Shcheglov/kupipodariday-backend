@@ -12,11 +12,6 @@ export class UsersController {
     private readonly wishesService: WishesService
   ) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get('me')
   @UseGuards(JwtGuard)
   async getProfile(@Req() req) {
@@ -25,7 +20,7 @@ export class UsersController {
     return profile;
   }
 
-  @Patch()
+  @Patch('me')
   @UseGuards(JwtGuard)
   async updateProfile(@Req() req, @Body() updateUserDto: UpdateUserDto) {
     const updatedProfile = await this.usersService.updateOne(req.user.id, updateUserDto);
